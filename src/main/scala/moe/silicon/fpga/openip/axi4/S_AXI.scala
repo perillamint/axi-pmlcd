@@ -92,6 +92,10 @@ class S_AXI(axi4param: AXI4Param) extends Module {
       // Flag RVALID
       axi_rvalid := 1.B
       
+      when (axi_rlen === 0.U) {
+        axi_rlast := 1.B
+      }
+      
       when (S_AXI.rready) {
         axiReadState := AXI4ReadState.RREADY
       }
@@ -100,6 +104,7 @@ class S_AXI(axi4param: AXI4Param) extends Module {
     is (AXI4ReadState.RREADY) {
       // Clear RVALID
       axi_rvalid := 0.B
+      axi_rlast  := 0.B
 
       when (axi_rlen === 0.U) {
         axiReadState := AXI4ReadState.ARVALID
@@ -170,6 +175,7 @@ class S_AXI(axi4param: AXI4Param) extends Module {
 
     is (AXI4WriteState.BVALID) {
       // Turn on BVALID
+      axi_bid    := axi_awid
       axi_bvalid := 1.B
       // Always ACK burst write... for now.
       axi_bresp := 0.U
