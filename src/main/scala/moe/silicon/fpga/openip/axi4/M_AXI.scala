@@ -7,7 +7,7 @@ import chisel3.stage.{ChiselStage, ChiselGeneratorAnnotation}
 import moe.silicon.fpga.openip.axi4.io.AXI4MasterBundle
 
 // ARM AXI High Performance interface (master)
-class M_AXI_HP(axi4param: AXI4Param) extends Module {
+class M_AXI(axi4param: AXI4Param) extends Module {
   val M_AXI = IO(new AXI4MasterBundle(axi4param))
 
   // AW channel
@@ -63,11 +63,9 @@ class M_AXI_HP(axi4param: AXI4Param) extends Module {
   M_AXI.arqos    := axi_arqos
   M_AXI.arvalid  := axi_arvalid
 
-  val axi_rlast   = RegInit(0.B)
   val axi_rvalid  = RegInit(0.B)
   val axi_rready  = RegInit(0.B)
 
-  M_AXI.rlast    := axi_rlast
   M_AXI.rvalid   := axi_rvalid
   M_AXI.rready   := axi_rready
 
