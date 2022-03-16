@@ -18,6 +18,7 @@ class M_AXI(axi4param: AXI4Param) extends Module {
   val axi_awlock  = RegInit(0.U(2.W))
   val axi_awcache = RegInit(0.U(4.W))
   val axi_awprot  = RegInit(0.U(3.W))
+  val axi_awid    = RegInit(0.U(axi4param.idWidth.W))
   val axi_awqos   = RegInit(0.U(4.W)) // See A8.1.1
   val axi_awvalid = RegInit(0.B)
 
@@ -28,6 +29,7 @@ class M_AXI(axi4param: AXI4Param) extends Module {
   M_AXI.awlock   := axi_awlock
   M_AXI.awcache  := axi_awcache
   M_AXI.awprot   := axi_awprot
+  M_AXI.awid     := axi_awid
   M_AXI.awqos    := axi_awqos
   M_AXI.awvalid  := axi_awvalid
 
@@ -50,6 +52,7 @@ class M_AXI(axi4param: AXI4Param) extends Module {
   val axi_arlock  = RegInit(0.U(2.W))
   val axi_arcache = RegInit(0.U(4.W))
   val axi_arprot  = RegInit(0.U(3.W))
+  val axi_arid    = RegInit(0.U(axi4param.idWidth.W))
   val axi_arqos   = RegInit(0.U(4.W)) // See A8.1.1
   val axi_arvalid = RegInit(0.B)
 
@@ -60,13 +63,12 @@ class M_AXI(axi4param: AXI4Param) extends Module {
   M_AXI.arlock   := axi_arlock
   M_AXI.arcache  := axi_arcache
   M_AXI.arprot   := axi_arprot
+  M_AXI.arid     := axi_arid
   M_AXI.arqos    := axi_arqos
   M_AXI.arvalid  := axi_arvalid
 
-  val axi_rvalid  = RegInit(0.B)
   val axi_rready  = RegInit(0.B)
 
-  M_AXI.rvalid   := axi_rvalid
   M_AXI.rready   := axi_rready
 
   val axi_bready  = RegInit(0.B)
@@ -82,7 +84,8 @@ class M_AXI(axi4param: AXI4Param) extends Module {
     is (AXI4ReadState.ARVALID) {
       // set up address and rise ARVALID
       axi_arvalid := 1.B
-      axi_arlen := 0.U // Single beat
+      axi_arlen   := 0.U // Single beat
+      axi_arid    := "h10".U // TODO: Replace me!
       axiReadState := AXI4ReadState.ARREADY
     }
 
@@ -119,7 +122,8 @@ class M_AXI(axi4param: AXI4Param) extends Module {
       // Set up address stuff.
       // rise AWVALID
       axi_awvalid := 1.B
-      axi_awlen := 0.U
+      axi_awlen   := 0.U
+      axi_awid    := "h10".U
       axiWriteState := AXI4WriteState.AWREADY
     }
 

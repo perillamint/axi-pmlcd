@@ -19,6 +19,7 @@ class AXI4MasterBundle(param: AXI4Param) extends Bundle {
   val awlock  = Output(UInt(2.W))
   val awcache = Output(UInt(4.W))
   val awprot  = Output(UInt(3.W))
+  val awid    = Output(UInt(param.idWidth.W))
   val awqos   = Output(UInt(4.W)) // See A8.1.1
   val awvalid = Output(Bool())
   val awready = Input(Bool())
@@ -39,14 +40,16 @@ class AXI4MasterBundle(param: AXI4Param) extends Bundle {
   val arlock  = Output(UInt(2.W))
   val arcache = Output(UInt(4.W))
   val arprot  = Output(UInt(3.W))
+  val arid    = Output(UInt(param.idWidth.W))
   val arqos   = Output(UInt(4.W)) // See A8.1.1
   val arvalid = Output(Bool())
   val arready = Input(Bool())
 
   // R channel
   val rdata   = Input(UInt(param.dataWidth.W))
+  val rid     = Input(UInt(param.idWidth.W))
   val rlast   = Input(Bool())
-  val rvalid  = Output(Bool())
+  val rvalid  = Input(Bool())
   val rready  = Output(Bool())
 
   // B channel

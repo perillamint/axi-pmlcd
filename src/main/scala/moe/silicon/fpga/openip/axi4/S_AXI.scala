@@ -8,8 +8,10 @@ import moe.silicon.fpga.openip.axi4.io.AXI4SlaveBundle
 
 class S_AXI(axi4param: AXI4Param) extends Module {
   val S_AXI = IO(new AXI4SlaveBundle(axi4param))
-  val GPIO = IO(new Bundle {
-    val output = Output(UInt(8.W))
+  val REGMEM = IO(new Bundle {
+    val we   = Output(Bool())
+    val addr = Output(UInt(axi4param.addrWidth.W))
+    val data = Output(UInt(axi4param.dataWidth.W))
   })
 
   val axiReadState = RegInit(AXI4ReadState.ARVALID)
@@ -44,12 +46,18 @@ class S_AXI(axi4param: AXI4Param) extends Module {
   val axi_waddr  = RegInit(0.U(axi4param.addrWidth.W))
   val axi_rlen   = RegInit(0.U(axi4param.burstWidth.W))
   val axi_wlen   = RegInit(0.U(axi4param.burstWidth.W))
-  val axi_arid    = RegInit(0.U(axi4param.idWidth.W))
-  val axi_awid    = RegInit(0.U(axi4param.idWidth.W))
+  val axi_arid   = RegInit(0.U(axi4param.idWidth.W))
+  val axi_awid   = RegInit(0.U(axi4param.idWidth.W))
 
-  // Set up GPIO
-  val gpio_reg = RegInit(0.U(8.W))
-  GPIO.output := gpio_reg
+  // Regmme
+
+  val regmem_we  = RegInit(0.B)
+  val regmem_addr= RegInit(0.U(axi4param.addrWidth.W))
+  val regmem_data= RegInit(0.U(axi4param.dataWidth.W))
+  
+  REGMEM.we     := regmem_we
+  REGMEM.addr   := regmem_addr
+  REGMEM.data   := regmem_data
 
   switch (axiReadState) {
     is (AXI4ReadState.ARVALID) {
@@ -124,6 +132,8 @@ class S_AXI(axi4param: AXI4Param) extends Module {
     is (AXI4WriteState.AWREADY) {
       // Turn off AWREADY
       axi_awready := 0.B
+      // Disable write enable
+      regmem_we   := 0.B
 
       axiWriteState := AXI4WriteState.WVALID
     }
@@ -142,7 +152,9 @@ class S_AXI(axi4param: AXI4Param) extends Module {
     is (AXI4WriteState.WREADY) {
       // Fetch data from the bus
       // ... and write it to gpio_reg
-      gpio_reg := S_AXI.wdata(7,0)
+      regmem_we   := 1.B
+      regmem_addr := axi_waddr
+      regmem_data := S_AXI.wdata
 
       // Turn off WREADY
       axi_wready := 0.B
@@ -161,6 +173,8 @@ class S_AXI(axi4param: AXI4Param) extends Module {
       axi_bvalid := 1.B
       // Always ACK burst write... for now.
       axi_bresp := 0.U
+      // Disable write enable
+      regmem_we   := 0.B
 
       // Wait for BREADY
       when (S_AXI.bready) {
