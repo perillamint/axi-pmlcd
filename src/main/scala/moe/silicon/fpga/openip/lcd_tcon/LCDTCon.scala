@@ -11,14 +11,24 @@ protected object TConState extends ChiselEnum {
   val state_nextrow = Value
 }
 
+class PMLCD extends Bundle {
+  val data = Output(UInt(4.W))
+  val flm  = Output(Bool())
+  val lp   = Output(Bool())
+  val xscl = Output(Bool()) // Data shift pulse
+  val m    = Output(Bool())
+}
+
+class PMLCD_IN extends Bundle {
+  val data = Input(UInt(4.W))
+  val flm  = Input(Bool())
+  val lp   = Input(Bool())
+  val xscl = Input(Bool()) // Data shift pulse
+  val m    = Input(Bool())
+}
+
 class LCDTCon(width: Int, height: Int) extends Module {
-  val lcd = IO(new Bundle {
-    val data = Output(UInt(4.W))
-    val flm  = Output(Bool())
-    val lp   = Output(Bool())
-    val xscl = Output(Bool()) // Data shift pulse
-    val m    = Output(Bool())
-  })
+  val lcd = IO(new PMLCD)
 
   // Internal register definitions
   val row = RegInit(0.U(BitUtil.getBitWidth(height).W))
@@ -121,15 +131,4 @@ class LCDTCon(width: Int, height: Int) extends Module {
       }
     }
   }
-}
-
-object LCDTCon extends App {
-  // Emit the verilog
-  (new ChiselStage).emitVerilog(new LCDTCon(320, 200), Array("-td", "vout"))
-
-  // generate graph files for circuit visualization
-  (new layered.stage.ElkStage).execute(
-    Array("-td", "vout", "--lowFir"),
-    Seq(ChiselGeneratorAnnotation(() => new LCDTCon(320, 200)))
-  )
 }
